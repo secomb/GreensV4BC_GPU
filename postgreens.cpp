@@ -15,21 +15,16 @@ TWS, May 2015
 #include "nrutil.h"
 
 void postgreens(void)
-{	
-	extern int max,nsp,nnt,npostgreensparams,npostgreensout;
-	extern float **pt,*dtmin,*postgreensparams,*postgreensout;
-	extern char numstr[6];
+{
+	extern int max, nsp, nnt, npostgreensparams, npostgreensout,imain;
+	extern float **pt, *dtmin, *postgreensparams, *postgreensout;
 	char fname[80];
 	FILE *ofp;
 
-	int	i,isp,itp;
-
-	strcpy(fname, "Current\\PostGreens");
-	strcat(fname,numstr); 
-	strcat(fname,".out");
+	sprintf(fname, "Current/PostGreens%03i.ps", imain);
 	ofp = fopen(fname, "w");
-//**************************************************************
-	#include "postgreens.cpp.dat"
+	//**************************************************************
+#include "postgreens.cpp.dat"
 //**************************************************************
 	fclose(ofp);
 }

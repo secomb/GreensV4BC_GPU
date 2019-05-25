@@ -2,17 +2,30 @@
 Tissue uptake rates of solutes as a function of levels
 Must be provided for each application.  TWS November 07.
 Version 1.0, May 1, 2008.
-With 9/08 updates
 Version 2.0, May 1, 2010.
 Version 3.0, May 17, 2011.
+***  Must rebuild project after switching tissrate.cpp.dat files ***
 ******************************************************/
 #include <math.h>
 #include "nrutil.h"
 #include <stdio.h>
-
 void tissrate(int nsp, float *p, float *mtiss, float *mptiss)
 {
-	extern float **tissparam;//added April 2010
+	extern int *oxygen;
+	extern float **tissparam;
+
+	int isp;
+
+#include "tissrate.cpp.dat"
+}
+
+
+
+/*
+
+Some sample code for tissrate.cpp.dat
+
+
 	float pcr,m0,gf0,gf1,gf2,aterm;//not external, April 2010
 	int isp;
 	for(isp=1; isp<=nsp; isp++){
@@ -39,7 +52,7 @@ void tissrate(int nsp, float *p, float *mtiss, float *mptiss)
 			mtiss[2] -= tissparam[2][2]*p[2];
 			mptiss[2] = -tissparam[2][2];
 
-		case 2: //non-permeable diffusible solute produced in hypoxic regions - old version 
+		case 2: //non-permeable diffusible solute produced in hypoxic regions - old version
 			gf0 = tissparam[1][isp];
 			gf1 = tissparam[2][isp];
 			if(p[1] >= 0.) mtiss[isp] = gf0*pcr/(p[1] + pcr) - gf1*p[isp];
@@ -54,7 +67,7 @@ void tissrate(int nsp, float *p, float *mtiss, float *mptiss)
 			else mtiss[isp] =  - gf1*p[isp];
 			mptiss[isp] = -gf1*pcr/(p[1] + pcr);
 			break;
-*/
+
 		case 2: //permeable solute delivered in blood with linear consumption in hypoxic regions - KOH, updated TWS July 2011
 			gf0 = tissparam[1][isp];
 			gf1 = tissparam[2][isp];
@@ -69,7 +82,7 @@ void tissrate(int nsp, float *p, float *mtiss, float *mptiss)
 				mtiss[isp] = -aterm;
 				mptiss[isp] = -gf1;
 			}
-			
+
 			break;
 		case 3: //permeable diffusiblbe solute produced in hypoxic regions by solute 2
 			gf0 = tissparam[1][isp];
@@ -102,7 +115,7 @@ void tissrate(int nsp, float *p, float *mtiss, float *mptiss)
 			else mtiss[isp] = gf0 - gf1*p[isp];
 			mptiss[isp] = -gf1;
 			break;
-*/
+
 		case 4: //non-diffusible non permeable solute produced from case 2 in hypoxic regions
 			gf0 = tissparam[1][isp];
 			gf1 = tissparam[2][isp];
@@ -115,4 +128,4 @@ void tissrate(int nsp, float *p, float *mtiss, float *mptiss)
 			printf("Error: nsp is too large in tissrate\n");
 		}
 	}
-}
+*/

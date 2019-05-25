@@ -16,7 +16,7 @@ gfx cre mat gold ambient 1 0.7 0 diffuse 1 0.7 0 specular 0.5 0.5 0.5 shininess 
 
 gfx create spectrum jet
 gfx modify spectrum jet clear overwrite_colour
-gfx modify spectrum jet linear range 0 1 red   colour_range 0 1 ambient diffuse component 1 
+gfx modify spectrum jet linear range 0 1 red   colour_range 0 1 ambient diffuse component 1
 gfx modify spectrum jet linear range 0 1 green colour_range 0 1 ambient diffuse component 2
 gfx modify spectrum jet linear range 0 1 blue  colour_range 0 1 ambient diffuse component 3
 
@@ -49,15 +49,14 @@ gfx mod win 1 view perspective
 
 void WriteExnodeHeader(FILE *exnode) // Write initial section of .exnode file
 {
-//    fprintf(exnode, "Region: /vessels\n");
-    fprintf(exnode, "Group name: vessels\n");
-    fprintf(exnode, " #Fields=3\n");
-    fprintf(exnode, " 1) coordinates, coordinate, rectangular cartesian, #Components=3\n");
-    fprintf(exnode, "  x.  Value index=1, #Derivatives=0, #Versions=1\n");
-    fprintf(exnode, "  y.  Value index=2, #Derivatives=0, #Versions=1\n");
-    fprintf(exnode, "  z.  Value index=3, #Derivatives=0, #Versions=1\n");
-    fprintf(exnode, " 2) vessel_radius, coordinate, rectangular cartesian, #Components=1\n");
-    fprintf(exnode, "  1.  Value index=4, #Derivatives=0, #Versions=1\n");
+	fprintf(exnode, "Group name: vessels\n");
+	fprintf(exnode, " #Fields=3\n");
+	fprintf(exnode, " 1) coordinates, coordinate, rectangular cartesian, #Components=3\n");
+	fprintf(exnode, "  x.  Value index=1, #Derivatives=0, #Versions=1\n");
+	fprintf(exnode, "  y.  Value index=2, #Derivatives=0, #Versions=1\n");
+	fprintf(exnode, "  z.  Value index=3, #Derivatives=0, #Versions=1\n");
+	fprintf(exnode, " 2) vessel_radius, coordinate, rectangular cartesian, #Components=1\n");
+	fprintf(exnode, "  1.  Value index=4, #Derivatives=0, #Versions=1\n");
 	fprintf(exnode, " 3) node_colour, coordinate, rectangular cartesian, #Components=3\n");
 	fprintf(exnode, "  1.  Value index=5, #Derivatives=0, #Versions=1\n");
 	fprintf(exnode, "  2.  Value index=6, #Derivatives=0, #Versions=1\n");
@@ -66,115 +65,106 @@ void WriteExnodeHeader(FILE *exnode) // Write initial section of .exnode file
 
 void WriteExelemHeader(FILE *exelem)  // Write initial section of .exelem file
 {
- //   fprintf(exelem, "Region: /vessels\n");
-    fprintf(exelem, "Group name: vessels\n");
-    fprintf(exelem, " Shape.  Dimension=1\n");
-    fprintf(exelem, " #Scale factor sets= 1\n");
-    fprintf(exelem, "  l.Lagrange, #Scale factors= 2\n");
-    fprintf(exelem, " #Nodes= 2\n #Fields=3\n");
-    fprintf(exelem, " 1) coordinates, coordinate, rectangular cartesian, #Components=3\n");
-    fprintf(exelem, "   x.  l.Lagrange, no modify, standard node based.\n     #Nodes= 2\n");
-    fprintf(exelem, "      1.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   1\n");
-    fprintf(exelem, "      2.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   2\n");
-    fprintf(exelem, "   y.  l.Lagrange, no modify, standard node based.\n     #Nodes= 2\n");
-    fprintf(exelem, "      1.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   1\n");
-    fprintf(exelem, "      2.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   2\n");
-    fprintf(exelem, "   z.  l.Lagrange, no modify, standard node based.\n     #Nodes= 2\n");
-    fprintf(exelem, "      1.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   1\n");
-    fprintf(exelem, "      2.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   2\n");
-    fprintf(exelem, " 2) vessel_radius, coordinate, rectangular cartesian, #Components=1\n");
-    fprintf(exelem, "   1.  l.Lagrange, no modify, standard node based.\n     #Nodes= 2\n");
-    fprintf(exelem, "      1.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   1\n");
-    fprintf(exelem, "      2.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   2\n");
-    fprintf(exelem, " 3) node_colour, coordinate, rectangular cartesian, #Components=3\n");
-    fprintf(exelem, "   1.  l.Lagrange, no modify, standard node based.\n");
-    fprintf(exelem, "     #Nodes= 2\n");
-    fprintf(exelem, "      1.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n");
-    fprintf(exelem, "       Scale factor indices:   1\n");
-    fprintf(exelem, "      2.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n");
-    fprintf(exelem, "       Scale factor indices:   2\n");
-    fprintf(exelem, "   2.  l.Lagrange, no modify, standard node based.\n");
-    fprintf(exelem, "     #Nodes= 2\n");
-    fprintf(exelem, "      1.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n");
-    fprintf(exelem, "       Scale factor indices:   1\n");
-    fprintf(exelem, "      2.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n");
-    fprintf(exelem, "       Scale factor indices:   2\n");   
-    fprintf(exelem, "   3.  l.Lagrange, no modify, standard node based.\n");
-    fprintf(exelem, "     #Nodes= 2\n");
-    fprintf(exelem, "      1.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n");
-    fprintf(exelem, "       Scale factor indices:   1\n");
-    fprintf(exelem, "      2.  #Values=1\n");
-    fprintf(exelem, "       Value indices:     1\n");
-    fprintf(exelem, "       Scale factor indices:   2\n");
+	fprintf(exelem, "Group name: vessels\n");
+	fprintf(exelem, " Shape.  Dimension=1\n");
+	fprintf(exelem, " #Scale factor sets= 1\n");
+	fprintf(exelem, "  l.Lagrange, #Scale factors= 2\n");
+	fprintf(exelem, " #Nodes= 2\n #Fields=3\n");
+	fprintf(exelem, " 1) coordinates, coordinate, rectangular cartesian, #Components=3\n");
+	fprintf(exelem, "   x.  l.Lagrange, no modify, standard node based.\n     #Nodes= 2\n");
+	fprintf(exelem, "      1.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   1\n");
+	fprintf(exelem, "      2.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   2\n");
+	fprintf(exelem, "   y.  l.Lagrange, no modify, standard node based.\n     #Nodes= 2\n");
+	fprintf(exelem, "      1.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   1\n");
+	fprintf(exelem, "      2.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   2\n");
+	fprintf(exelem, "   z.  l.Lagrange, no modify, standard node based.\n     #Nodes= 2\n");
+	fprintf(exelem, "      1.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   1\n");
+	fprintf(exelem, "      2.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   2\n");
+	fprintf(exelem, " 2) vessel_radius, coordinate, rectangular cartesian, #Components=1\n");
+	fprintf(exelem, "   1.  l.Lagrange, no modify, standard node based.\n     #Nodes= 2\n");
+	fprintf(exelem, "      1.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   1\n");
+	fprintf(exelem, "      2.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n       Scale factor indices:   2\n");
+	fprintf(exelem, " 3) node_colour, coordinate, rectangular cartesian, #Components=3\n");
+	fprintf(exelem, "   1.  l.Lagrange, no modify, standard node based.\n");
+	fprintf(exelem, "     #Nodes= 2\n");
+	fprintf(exelem, "      1.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n");
+	fprintf(exelem, "       Scale factor indices:   1\n");
+	fprintf(exelem, "      2.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n");
+	fprintf(exelem, "       Scale factor indices:   2\n");
+	fprintf(exelem, "   2.  l.Lagrange, no modify, standard node based.\n");
+	fprintf(exelem, "     #Nodes= 2\n");
+	fprintf(exelem, "      1.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n");
+	fprintf(exelem, "       Scale factor indices:   1\n");
+	fprintf(exelem, "      2.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n");
+	fprintf(exelem, "       Scale factor indices:   2\n");
+	fprintf(exelem, "   3.  l.Lagrange, no modify, standard node based.\n");
+	fprintf(exelem, "     #Nodes= 2\n");
+	fprintf(exelem, "      1.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n");
+	fprintf(exelem, "       Scale factor indices:   1\n");
+	fprintf(exelem, "      2.  #Values=1\n");
+	fprintf(exelem, "       Value indices:     1\n");
+	fprintf(exelem, "       Scale factor indices:   2\n");
 }
 
 void cmgui(float *segvar)
 {
-	extern int max,mxx,myy,mzz,nseg,nnod;
-	extern int *segtyp,*ista,*iend;
-	extern float *diam,**cnode;
-	extern char numstr[6];
+	extern int max, mxx, myy, mzz, nseg, nnod, imain;
+	extern int *segtyp, *ista, *iend;
+	extern float *diam, **cnode;
 
-	int iseg,is,in;
-	float red,green,blue,xz,xzmin,xzmax;
+	int iseg, is, in;
+	float red, green, blue, xz, xzmin, xzmax;
 	char fname[80];
-	FILE *exelem,*exnode;
+	FILE *exelem, *exnode;
 
-	strcpy(fname, "Current\\greens");
-	strcat(fname,numstr); 
-	strcat(fname,".exelem");
-	exelem = fopen(fname,"w");
-	strcpy(fname, "Current\\greens");
-	strcat(fname,numstr); 
-	strcat(fname,".exnode");
-	exnode = fopen(fname,"w");
+	sprintf(fname, "Current/greens%03i.exelem", imain);
+	exelem = fopen(fname, "w");
+	sprintf(fname, "Current/greens%03i.exnode", imain);
+	exnode = fopen(fname, "w");
 	WriteExelemHeader(exelem);
 	WriteExnodeHeader(exnode);
 
 	xzmin = 1.e6;
 	xzmax = -1.e6;
-	for(iseg=1; iseg<=nseg; iseg++) if(segtyp[iseg] == 4 || segtyp[iseg] == 5){
-		xzmin = FMIN(xzmin,segvar[iseg]);
-		xzmax = FMAX(xzmax,segvar[iseg]);
+	for (iseg = 1; iseg <= nseg; iseg++) if (segtyp[iseg] == 4 || segtyp[iseg] == 5) {
+		xzmin = FMIN(xzmin, segvar[iseg]);
+		xzmax = FMAX(xzmax, segvar[iseg]);
 	}
-
 	is = 0;
 	in = 0;
-	for(iseg=1; iseg<=nseg; iseg++) if(segtyp[iseg] == 4 || segtyp[iseg] == 5){
-		if(xzmin != xzmax) xz = (segvar[iseg] - xzmin)/(xzmax - xzmin);
+	for (iseg = 1; iseg <= nseg; iseg++) if (segtyp[iseg] == 4 || segtyp[iseg] == 5) {
+		if (xzmin != xzmax) xz = (segvar[iseg] - xzmin) / (xzmax - xzmin);
 		else xz = 0.75;
-		blue = FMIN(FMAX(1.5-4.*fabs(xz-0.25), 0.), 1.);//Set up colors using Matlab 'jet' scheme
-		green= FMIN(FMAX(1.5-4.*fabs(xz-0.5), 0.), 1.);
-		red  = FMIN(FMAX(1.5-4.*fabs(xz-0.75), 0.), 1.);
+		blue = FMIN(FMAX(1.5 - 4.*fabs(xz - 0.25), 0.), 1.);//Set up colors using Matlab 'jet' scheme
+		green = FMIN(FMAX(1.5 - 4.*fabs(xz - 0.5), 0.), 1.);
+		red = FMIN(FMAX(1.5 - 4.*fabs(xz - 0.75), 0.), 1.);
 		is++;
-		in++;
-//  write to elements file
-		fprintf(exelem, "Element: %d 0 0\n", is);
-		fprintf(exelem, "  Nodes: %d %d\n", in,in+1);
+		in++;		
+		fprintf(exelem, "Element: %d 0 0\n", is);	//  write to elements file
+		fprintf(exelem, "  Nodes: %d %d\n", in, in + 1);
 		fprintf(exelem, "  Scale factors: 1 1\n");
-//  write to nodes file
-		fprintf(exnode, "Node: %d\n", in);
-		fprintf(exnode, "%6.1f %6.1f %6.1f\n", cnode[1][ista[iseg]],cnode[2][ista[iseg]],cnode[3][ista[iseg]]);
-		fprintf(exnode, "%6.2f\n", diam[iseg]/2.);
-		fprintf(exnode, "%6.2f %6.2f %6.2f\n", red,green,blue);
+		fprintf(exnode, "Node: %d\n", in);			//  write to nodes file
+		fprintf(exnode, "%6.1f %6.1f %6.1f\n", cnode[1][ista[iseg]], cnode[2][ista[iseg]], cnode[3][ista[iseg]]);
+		fprintf(exnode, "%6.2f\n", diam[iseg] / 2.);
+		fprintf(exnode, "%6.2f %6.2f %6.2f\n", red, green, blue);
 		in++;
 		fprintf(exnode, "Node: %d\n", in);
-		fprintf(exnode, "%6.1f %6.1f %6.1f\n", cnode[1][iend[iseg]],cnode[2][iend[iseg]],cnode[3][iend[iseg]]);
-		fprintf(exnode, "%6.2f\n", diam[iseg]/2.);
-		fprintf(exnode, "%6.2f %6.2f %6.2f\n", red,green,blue);
+		fprintf(exnode, "%6.1f %6.1f %6.1f\n", cnode[1][iend[iseg]], cnode[2][iend[iseg]], cnode[3][iend[iseg]]);
+		fprintf(exnode, "%6.2f\n", diam[iseg] / 2.);
+		fprintf(exnode, "%6.2f %6.2f %6.2f\n", red, green, blue);
 	}
 	fclose(exelem);
 	fclose(exnode);

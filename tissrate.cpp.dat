@@ -13,6 +13,3 @@
 	po2 = FMAX(p[1],0.);		//get rid of negative values
 	mtiss[1] = -m0*po2/(po2 + pcr);
 	if(po2 > 0.) mptiss[1] = -m0*pcr/SQR(po2 + pcr);
-
-
-
