@@ -4,16 +4,17 @@ Algorithm 12, Parameter-free iterative linear solver by R. Weiss, 1996
 system of linear equations:  aa(i,j)*x(j) = b(i)
 Version using BLAS library on GPU
 TWS, March 2011
+Cuda 10.1 Version, August 2019
 **************************************************************************/
-#include <shrUtils.h>
-#include <cutil_inline.h>
-#include <cusparse.h>
+//#include <shrUtils.h>
+//#include <cutil_inline.h>
+#include <cuda_runtime.h>
+#include <stdio.h>
 #include <cublas.h>
 #include "nrutil.h"
 
 double bicgstabBLASD(double **a, double *b, double *x, int n, double eps, int itmax)
 {
-	extern int useGPU;
 	extern double *h_x,*h_b,*h_a,*h_rs;
 	extern double *d_a, *d_res, *d_x, *d_b;
 	extern double *d_r, *d_rs, *d_v, *d_s, *d_t, *d_p, *d_er;
@@ -30,8 +31,6 @@ double bicgstabBLASD(double **a, double *b, double *x, int n, double eps, int it
 		h_rs[j] = 1.;
 	}
 
-	cudaSetDevice( useGPU-1 );
-
 	cudaMemcpy(d_a, h_a, nmem2, cudaMemcpyHostToDevice);//copy variables to GPU
     cudaMemcpy(d_x, h_x, nmem1, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_b, h_b, nmem1, cudaMemcpyHostToDevice);
@@ -39,7 +38,6 @@ double bicgstabBLASD(double **a, double *b, double *x, int n, double eps, int it
 
 //	r[i] += a[i][j]*x[j];
 	cublasDgemv('T', n, n, 1.f, d_a, n, d_x, 1, 0.f, d_r, 1);
-	//cudaMemcpy(h_x, d_r, nmem1, cudaMemcpyDeviceToHost);
 
 //	r[i] -= b[i];
 	cublasDaxpy (n, -1.f, d_b, 1, d_r, 1);
@@ -115,11 +113,11 @@ double bicgstabBLASD(double **a, double *b, double *x, int n, double eps, int it
 		cudaMemcpy(&err, d_er+ierr-1, nmem0, cudaMemcpyDeviceToHost);
 		kk++;
 	}
-	while(kk < itmax && abs(err) > eps);
+	while(kk < itmax && fabs(err) > eps);
 
 	cudaMemcpy(h_x, d_x, nmem1, cudaMemcpyDeviceToHost);//bring back x for final result
 	for(i=0; i<n; i++) x[i+1] = h_x[i];
 
-	if(abs(err) > eps) printf("*** Warning: linear solution using BICGSTB not converged, err = %e\n",err);
+	if(fabs(err) > eps) printf("*** Warning: linear solution using BICGSTB not converged, err = %e\n",err);
 	return err;	
 }

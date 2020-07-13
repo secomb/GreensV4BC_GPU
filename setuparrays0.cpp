@@ -16,7 +16,7 @@ void setuparrays0()
 {
 	extern int nsp, mxx, myy, mzz;
 	extern int *errvesselcount, *errtissuecount, *imaxerrvessel, *imaxerrtissue, ***nbou;
-	extern float *pmin, *pmax, *mtiss, *mptiss, *g0old, *ptt, *ptpt, *qtsum, *qvsum, *errvessel;
+	extern float *pmint, *pmaxt, *pminv, *pmaxv, *mtiss, *mptiss, *g0old, *ptt, *ptpt, *qtsum, *qvsum, *errvessel;
 	extern float *errtissue, *dqvsumdg0, *dqtsumdg0, *pinit, *p, *epsvessel, *epstissue, *eps, *g0, *g0facnew;
 	extern float *qvfac, *x, *y, *ss, *axt, *ayt, *azt, ***dtt;
 	extern float *pmeant, *pmeanv, *psdt, *psdv;
@@ -27,8 +27,10 @@ void setuparrays0()
 	imaxerrtissue = ivector(1, nsp);
 	nbou = i3tensor(1, mxx, 1, myy, 1, mzz);
 
-	pmin = vector(1, nsp);
-	pmax = vector(1, nsp);
+	pmint = vector(1, nsp);
+	pmaxt = vector(1, nsp);
+	pminv = vector(1, nsp);
+	pmaxv = vector(1, nsp);
 	pmeant = vector(1, nsp);
 	pmeanv = vector(1, nsp);
 	psdt = vector(1, nsp);

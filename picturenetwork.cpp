@@ -48,7 +48,6 @@ void picturenetwork(float *nodvar, float *segvar, const char fname[])
 		zmin = FMIN(zmin, zcoord - 1.);
 		zmax = FMAX(zmax, zcoord + 1.);
 	}
-
 	picfac = FMIN(500. / xmax, 700. / ymax);
 	ofp = fopen(fname, "w");
 	fprintf(ofp, "%%!PS-Adobe-2.0\n");
@@ -92,6 +91,12 @@ void picturenetwork(float *nodvar, float *segvar, const char fname[])
 		xzmin = FMIN(xzmin, segvar[iseg]);
 		xzmax = FMAX(xzmax, segvar[iseg]);
 	}
+	xzmin = floor(xzmin);	//to give round numbers on scale bar
+	xzmax = ceil(xzmax);
+
+	
+	xzmin = 0.;	//temporary
+	xzmax = 100.;
 	for (ilevel = 1; ilevel <= nlevel; ilevel++) {
 		zbottom = zmin + (ilevel - 1)*(zmax - zmin) / nlevel;
 		ztop = zmin + ilevel * (zmax - zmin) / nlevel;
@@ -157,6 +162,7 @@ void picturenetwork(float *nodvar, float *segvar, const char fname[])
 	fprintf(ofp, "/Times-Roman findfont\n");
 	fprintf(ofp, "8 scalefont\n");
 	fprintf(ofp, "setfont\n");
+
 	for (k = 0; k <= 10; k++) {
 		xz = k * 0.1;
 		c = xzmin + (xzmax - xzmin)*xz;
@@ -166,7 +172,7 @@ void picturenetwork(float *nodvar, float *segvar, const char fname[])
 		fprintf(ofp, "%f %f %f setrgbcolor\n", red, green, blue);
 		fprintf(ofp, "n %g %g m %g %g l %g %g l %g %g l cf\n",
 			cbx, cby + k * cbbox, cbx + cbbox, cby + k * cbbox, cbx + cbbox, cby + (k + 1)*cbbox, cbx, cby + (k + 1)*cbbox);
-		if (k > 0) fprintf(ofp, "%g %f m 0 0 0 setrgbcolor (%g) show\n", cbx + cbbox * 1.1, cby + cbbox * (k - 0.1), c);
+		fprintf(ofp, "%g %f m 0 0 0 setrgbcolor (%g) show\n", cbx + cbbox * 1.1, cby + cbbox * (k + 0.3), c);
 	}
 	fprintf(ofp, "n %g %g m %g %g l %g %g l %g %g l cs\n",
 		cbx, cby, cbx + cbbox, cby, cbx + cbbox, cby + cbbox * 11, cbx, cby + cbbox * 11);

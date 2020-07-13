@@ -29,7 +29,7 @@ void analyzenet(void);
 void picturenetwork(float *nodvar, float *segvar, const char fname[]);
 void greens(void);
 void contour(const char fname[]);
-void histogram(const char fname[]);
+void histogram(float *var, int n, const char fname[]);
 void setuparrays0();
 void setuparrays1(int nseg, int nnod);
 void setuparrays2(int nnv, int nnt);
@@ -40,12 +40,10 @@ float bloodconc(float p, float h);
 
 void bicgstabBLASDinit(int nnvGPU);
 void bicgstabBLASDend(int nnvGPU);
-void bicgstabBLASStinit(int nntGPU);
-void bicgstabBLASStend(int nntGPU);
 void tissueGPUinit(int nntGPU, int nnvGPU);
 void tissueGPUend(int nntGPU, int nnvGPU);
 
-int max=100,nmaxvessel,nmaxtissue,nmax, nmaxbc, rungreens,initgreens,g0method,linmethod, is2d;
+int max=100,nmaxvessel,nmaxtissue,nmax, nmaxbc, rungreens,initgreens,g0method,linmethod, is2d, nHF;
 int mxx, myy, mzz, nnt, nseg, nnod, nnodfl, nnv, nsp, nnodbc, nodsegm, nsegfl, kmain, imain;
 int slsegdiv,nsl1,nsl2;
 int nvaryparams,nruns,ntissparams,npostgreensparams,npostgreensout;	//needed for varying parameters, postgreens
@@ -72,11 +70,11 @@ float inVendcdp, inArtdcdp, inCapdcdp, outVendcdp, outArtdcdp, outCapdcdp;
 float inFlux, outFlux, diffFlux, Vsim, extraction, QeffS, consumption, perfusionS, HDin0, outConcErr, outConcErrMax;
 float Vups = 0., Vpar = 0., inArteryFlow, perfusionA, inArtConcNew, inArteryFlux;
 
-float *axt,*ayt,*azt,*ds,*diff,*pmin,*pmax,*pmeant, *pmeanv, *psdt, *psdv, *pref,*g0,*g0fac,*g0facnew,*sumal, *dtmin;
+float *axt,*ayt,*azt,*ds,*diff,*pmint, *pmaxt, *pminv, *pmaxv, *pmeant, *pmeanv, *psdt, *psdv, *pref,*g0,*g0fac,*g0facnew,*sumal, *dtmin;
 float *diam,*rseg,*q,*qdata,*qq,*hd,*oxflux,*segc,*bcprfl,*bchd,*nodvar,*segvar,*qvtemp,*qvfac;
 float *x,*y,*lseg,*ss,*cbar,*mtiss,*mptiss,*dqvsumdg0,*dqtsumdg0;
 float *epsvessel,*epstissue,*eps,*errvessel,*errtissue,*pinit,*p;
-float *rhs,*rhstest,*g0old,*ptt,*ptpt,*qtsum,*qvsum, *xsl0,*xsl1,*xsl2,*clmin,*clint,*cl;
+float *rhs,*rhstest,*g0old,*ptt,*ptpt,*qtsum,*qvsum, *xsl0,*xsl1,*xsl2,*clmin,*clint,*cl, *histogramdisplay;
 float **start,**scos,**ax,**cnode,**resisdiam,**resis,**bcp, **qv,**qt,**pv,**pev,**pt, **qvseg,**pvseg,**pevseg;
 float **paramvalue,*solutefac,*intravascfac,*postgreensparams,*postgreensout;
 float **pvt,**pvprev,**qvprev,**cv,**dcdp,**tissparam;
@@ -97,19 +95,30 @@ float *d_tissxyz,*d_vessxyz;
 
 int main(int argc, char *argv[])
 {
-	int iseg, inod, inodbc, j, kbcs, isp;
+	int iseg, inod, inodbc, i, j, kbcs, isp;
 	char fname[80];
 	FILE *ofp;
 
-#if defined(__linux__) 
-	//linux code goes here
-#elif defined(_WIN32) 			//Windows version
-	bool NoOverwrite = false;
+//Create a Current subdirectory if it does not already exist. August 2017.  Modified January 2019
+	//copy input data files to "Current" directory
+
+	#if defined(__unix__)
+		if (!fs::exists("Current")) fs::create_directory("Current");
+		fs::copy_file("BCparams.dat", fs::path("Current/BCparams.dat"), fs::copy_options::overwrite_existing);
+		fs::copy_file("ContourParams.dat", fs::path("Current/ContourParams.dat"), fs::copy_options::overwrite_existing);
+		fs::copy_file("SoluteParams.dat", fs::path("Current/SoluteParams.dat"), fs::copy_options::overwrite_existing);
+		fs::copy_file("Network.dat", fs::path("Current/Network.dat"), fs::copy_options::overwrite_existing);
+		fs::copy_file("IntravascRes.dat", fs::path("Current/IntravascRes.dat"), fs::copy_options::overwrite_existing);
+		if (fs::exists("Varyparams.dat")) 
+			fs::copy_file("VaryParams.dat", fs::path("Current/VaryParams.dat"), fs::copy_options::overwrite_existing);
+		fs::copy_file("tissrate.cpp.dat", fs::path("Current/tissrate.cpp.dat"), fs::copy_options::overwrite_existing);		
+	#elif defined(_WIN32)
+		BOOL NoOverwrite = FALSE;
 	DWORD ftyp = GetFileAttributesA("Current\\");
 	if (ftyp != FILE_ATTRIBUTE_DIRECTORY) system("mkdir Current");		//Create a Current subdirectory if it does not already exist.
 	CopyFile("BCparams.dat", "Current\\BCparams.dat", NoOverwrite); //copy input data files to "Current" directory
-	CopyFile("ContourParams.dat.dat", "Current\\ContourParams.dat", NoOverwrite);
-	CopyFile("SoluteParamsParams.dat.dat", "Current\\SoluteParamsParams.dat", NoOverwrite);
+	CopyFile("ContourParams.dat", "Current\\ContourParams.dat", NoOverwrite);
+	CopyFile("SoluteParams.dat", "Current\\SoluteParams.dat", NoOverwrite);
 	CopyFile("Network.dat", "Current\\Network.dat", NoOverwrite);
 	CopyFile("IntravascRes.dat","Current\\IntravascRes.dat",NoOverwrite);
 	CopyFile("tissrate.cpp.dat","Current\\tissrate.cpp.dat",NoOverwrite);
@@ -138,7 +147,6 @@ int main(int argc, char *argv[])
 		nntGPU = mxx*myy*mzz;	//this is the maximum possible number of tissue points
 		nnvGPU = 2000;	//start by assigning a good amount of space on GPU - may increase nnvGPU later
 		bicgstabBLASDinit(nnvGPU);
-		bicgstabBLASStinit(nntGPU);
 		tissueGPUinit(nntGPU, nnvGPU);
 	}
 
@@ -147,8 +155,8 @@ int main(int argc, char *argv[])
 	picturenetwork(nodvar, segvar, "Current/NetNodesSegs.ps");
 
 	for (iseg = 1; iseg <= nseg; iseg++) {
-		if (segtyp[iseg] == 4 || segtyp[iseg] == 5) segvar[iseg] = log(fabs(qdata[iseg]));
-		else segvar[iseg] = 0.;
+		if (segtyp[iseg] == 4 || segtyp[iseg] == 5)	segvar[iseg] = log10(FMAX(fabs(qdata[iseg]), 0.001));
+		else segvar[iseg] = -3.;
 	}
 	cmgui(segvar);
 	picturenetwork(nodvar, segvar, "Current/FlowRates.ps");
@@ -286,7 +294,7 @@ int main(int argc, char *argv[])
 			if (fabs(outConcErr) < outConcErrMax) goto bcs_converged;
 
 			// Reset inflow concentrations to match computed outflow concentrations
-			inCapConc += 1.5*(outCapConc - inCapConc);	//overrelax here to speed convergence
+			inCapConc += 1.5*(outCapConc - inCapConc);	//overrelax here to speed convergence //but reset to 1.0 for extremely hypoxic cases
 			inVenConc += 1.5*(outVenConc - inVenConc);			
 			if(imain > 1) inArtConc = inArtConcNew;
 		}
@@ -337,7 +345,10 @@ bcs_converged:;											//boundary conditions converged
 		fprintf(ofp, "Perfusion (A) = %f cm^3/cm^3/min\n", perfusionA);
 		fprintf(ofp, "Consumption (S) = %f cm^3O2/cm^3/min\n", consumption);
 		fprintf(ofp, "Vessel PO2 (mean +- sd) = %.3f +- %.3f\n", pmeanv[1], psdv[1]);
+		fprintf(ofp, "Vessel PO2 min = %.3f, max = %.3f\n", pminv[1], pmaxv[1]);
 		fprintf(ofp, "Tissue PO2 (mean +- sd) = %.3f +- %.3f\n", pmeant[1], psdt[1]);
+		fprintf(ofp, "Tissue PO2 min = %.3f, max = %.3f\n", pmint[1], pmaxt[1]);
+		fprintf(ofp, "Hypoxic fraction (%% < p0) = %.3f\n", nHF * 100. /nnt);
 		fprintf(ofp, "Delta C = %f\n", inArteryConc - outVenConc);
 		fprintf(ofp, "Extraction = %f\n\n", extraction);
 		if(npostgreensparams){
@@ -356,14 +367,26 @@ bcs_converged:;											//boundary conditions converged
 		sprintf(fname, "Current/Contour%03i.ps", imain);
 		contour(fname);
 
-		sprintf(fname, "Current/Histogram%03i.out", imain);
-		histogram(fname);
+		sprintf(fname, "Current/HistogramPO2v%03i.out", imain);	//vessel PO2
+		i = 0;
+		for (j = 1; j <= nnv; j++) if (segtyp[mainseg[j]] == 4 || segtyp[mainseg[j]] == 5) {
+			i++;
+			histogramdisplay[i] = pv[j][1];
+		}
+		histogram(histogramdisplay, i, fname);
+
+		sprintf(fname, "Current/HistogramPO2t%03i.out", imain);	//tissue PO2
+		for (i = 1; i <= nnt; i++) histogramdisplay[i] = FMIN(pt[i][1],99.9);
+		histogram(histogramdisplay, nnt, fname);
+
+		sprintf(fname, "Current/HistogramDistance%03i.out", imain);	//distance to nearest vessel
+		for (i = 1; i <= nnt; i++) histogramdisplay[i] = dtmin[i];
+		histogram(histogramdisplay, nnt, fname);
 	}
 
 	if(useGPU){
 		tissueGPUend(nntGPU, nnvGPU);
 		bicgstabBLASDend(nnvGPU);
-		bicgstabBLASStend(nntGPU);
 	}
 	return 0;
 }

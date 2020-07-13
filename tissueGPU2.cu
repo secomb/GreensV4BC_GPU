@@ -5,9 +5,6 @@ strengths qt to vessel solute levels pv.
 Each vessel point is assigned one thread.
 TWS January 2012
 ************************************************************/
-#include <omp.h>
-#include <stdio.h>
-#include <cutil_inline.h>
 
 __global__ void tissueGPU2Kernel(float *d_tissxyz, float *d_vessxyz, float *d_pv000, float *d_qt000,
 	int nnt, int nnv, int is2d, float req, float r2d)

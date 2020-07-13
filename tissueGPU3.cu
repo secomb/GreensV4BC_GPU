@@ -5,8 +5,6 @@ strengths qv to tissue solute levels pt.
 Each tissue point is assigned one thread.
 TWS January 2012
 ************************************************************/
-#include <stdio.h>
-#include <cutil_inline.h>
 
 __global__ void tissueGPU3Kernel(float *d_tissxyz, float *d_vessxyz, float *d_pt000, float *d_qv000,
 	int nnt, int nnv, int is2d, float req, float r2d)

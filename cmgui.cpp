@@ -42,10 +42,16 @@ gfx mod win 1 view perspective
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include <cstdio>
-#include <malloc.h>
 #include <math.h>
 #include <string.h>
 #include "nrutil.h"
+
+// Updated to support Mac OSX, May 2019
+# if defined(__APPLE__)
+	#include <malloc/malloc.h>
+#else
+	#include <malloc.h>
+#endif
 
 void WriteExnodeHeader(FILE *exnode) // Write initial section of .exnode file
 {
@@ -143,6 +149,11 @@ void cmgui(float *segvar)
 		xzmin = FMIN(xzmin, segvar[iseg]);
 		xzmax = FMAX(xzmax, segvar[iseg]);
 	}
+	xzmin = floor(xzmin);	//to give round numbers on scale bar (from picturenetwork)
+	xzmax = ceil(xzmax);
+
+	xzmin = 0.;	//temporary
+	xzmax = 100.;
 	is = 0;
 	in = 0;
 	for (iseg = 1; iseg <= nseg; iseg++) if (segtyp[iseg] == 4 || segtyp[iseg] == 5) {

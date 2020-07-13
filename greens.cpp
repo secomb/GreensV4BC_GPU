@@ -110,7 +110,7 @@ void tissueGPUcopy();
 
 void greens(void)
 {
-	extern int nmaxvessel, nmaxtissue, nmax, g0method, linmethod, kmain, imain;
+	extern int nmaxvessel, nmaxtissue, nmax, g0method, linmethod, kmain, imain, nHF;
 	extern int mxx,myy,mzz,nnt,nnv,nseg,nsp,nnodbc;
 	extern int is2d; //needed for 2d version
 	extern int nntGPU,nnvGPU,useGPU;//needed for GPU version
@@ -123,7 +123,7 @@ void greens(void)
 	extern float p50, cs, req, totalq, q0fac, fac, flowfac, lowflowcrit, errfac, v, vol, vdom, tlength, pi1;
 	extern float tlengthq, tlengthqhd;
 	extern float alx,aly,alz,w2d,r2d; //needed for 2d version
-	extern float *axt, *ayt, *azt, *ds, *diff, *pmin, *pmax, *pmeant, *pmeanv, *psdt, *psdv, *g0, *g0fac, *g0facnew, *pref, *dtmin;
+	extern float *axt, *ayt, *azt, *ds, *diff, *pmint, *pmaxt, *pminv, *pmaxv, *pmeant, *pmeanv, *psdt, *psdv, *g0, *g0fac, *g0facnew, *pref, *dtmin;
 	extern float *diam,*rseg,*qdata,*q,*qq,*hd,*bchd,*qvtemp,*qvfac;
 	extern float *x,*lseg,*mtiss,*mptiss,*dqvsumdg0,*dqtsumdg0;
 	extern float *epsvessel,*epstissue,*eps,*errvessel,*errtissue,*p;
@@ -331,7 +331,7 @@ void greens(void)
 		//compute contribution pvt from tissue source strengths qt
 		if(useGPU){
 			for(isp=1; isp<=nsp; isp++){
-				if(permsolute[isp] == 1){
+				if(permsolute[isp]){
 					for(itp=1; itp<=nnt; itp++) qt000[itp-1] = qt[itp][isp];
 					tissueGPU2c();	//Compute contribution from tissue source strengths
 					for(i=1; i<=nnv; i++){
@@ -340,12 +340,12 @@ void greens(void)
 						if(g0method != 1) pvt[i][isp] += g0[isp];
 					}
 				}
-				else if(diffsolute[isp] == 1) for(i=1; i<=nnv; i++) pvt[i][isp] = g0[isp];
+				else if(diffsolute[isp]) for(i=1; i<=nnv; i++) pvt[i][isp] = g0[isp];
 			}
 		}
 		else{
 			for(i=1; i<=nnv; i++){
-				for(isp=1; isp<=nsp; isp++) if(diffsolute[isp] == 1) {
+				for(isp=1; isp<=nsp; isp++) if(diffsolute[isp]) {
 					if(g0method == 1 && permsolute[isp] == 1) pvt[i][isp] = 0.;
 					else pvt[i][isp] = g0[isp];
 				}
@@ -457,7 +457,7 @@ void greens(void)
 							g0[isp] = matx[nnv+1];
 						}
 					}
-					if(g0method == 2){
+					if(g0method == 2){			//linear system NOT including G0 as unknown
 						if(linmethod == 1){
 							for(i=1; i<=nnv; i++){
 								rhsg[i][1] = rhs[i];
@@ -596,10 +596,11 @@ vesselconv:;
 				dqtsumdg0[isp] = 0.;
 				errtissuecount[isp] = 0;
 			}
-			if(useGPU){		//GPU method, NOT using successive updating
+			//contribution ptt from tissue source strengths qt
+			if(useGPU){		//NOT using successive updating
 				if(is2d) lam = lam2d;
 				else lam = lam3d;
-				for(isp=1; isp<=nsp; isp++) if(diffsolute[isp] == 1){
+				for(isp=1; isp<=nsp; isp++) if(diffsolute[isp]){
 					for(itp=1; itp<=nnt; itp++) qt000[itp-1] = qt[itp][isp];
 					tissueGPU1c();	//Compute contribution from tissue source strengths
 					for(itp=1; itp<=nnt; itp++)
@@ -639,13 +640,13 @@ vesselconv:;
 						ixdiff = abs(ix - jx) + 1;
 						iydiff = abs(iy - jy) + 1;
 						izdiff = abs(iz - jz) + 1;
-						for(isp=1; isp<=nsp; isp++) if(diffsolute[isp] == 1) ptt[isp] += dtt[ixdiff][iydiff][izdiff]*qt[jtp][isp];
+						for(isp=1; isp<=nsp; isp++) if(diffsolute[isp]) ptt[isp] += dtt[ixdiff][iydiff][izdiff]*qt[jtp][isp];
 					}
 					for(isp=1; isp<=nsp; isp++) ptpt[isp] = pt[itp][isp];
 					for(isp=1; isp<=nsp; isp++){
 						if(diffsolute[isp])		//diffusible solutes, underrelax 
 							pt[itp][isp] = (1.-lam)*pt[itp][isp] + lam*(ptv[itp][isp]*qvfac[isp] + g0[isp] + ptt[isp]/diff[isp]);
-					else{						//non-diffusible - use Newton method to solve for pt.
+						else{						//non-diffusible - use Newton method to solve for pt.
 							tissrate(nsp,ptpt,mtiss,mptiss);	//update tissrates
 							if(mptiss[isp] == 0.) printf("*** Error: mptiss[%i] = 0 at tissue point %i\n",isp,itp); 
 							else pt[itp][isp] -= mtiss[isp]/mptiss[isp];
@@ -842,15 +843,15 @@ mainconv:;
 	ofp = fopen(fname, "w");
 	fprintf(ofp,"Vessel levels\n");
 	for(isp=1; isp<=nsp; isp++) if(permsolute[isp]){
-		pmax[isp] = -1.e8;
+		pmaxv[isp] = -1.e8;
 		pmeanv[isp] = 0.;
 		psdv[isp] = 0.;
-		pmin[isp] = 1.e8;
+		pminv[isp] = 1.e8;
 		for(i=1; i<=nnv; i++){
 			pmeanv[isp] += pv[i][isp];
 			psdv[isp] += SQR(pv[i][isp]);
-			pmax[isp] = FMAX(pv[i][isp],pmax[isp]);
-			pmin[isp] = FMIN(pv[i][isp],pmin[isp]);
+			pmaxv[isp] = FMAX(pv[i][isp],pmaxv[isp]);
+			pminv[isp] = FMIN(pv[i][isp],pminv[isp]);
 		}
 		pmeanv[isp] = pmeanv[isp]/nnv;
 		psdv[isp] = sqrt(psdv[isp]/nnv - SQR(pmeanv[isp]));
@@ -860,10 +861,10 @@ mainconv:;
 	for(isp=1; isp<=nsp; isp++) if(permsolute[isp])	fprintf(ofp,"%12f ", pmeanv[isp]);
 	fprintf(ofp,"\npsdv\n");
 	for(isp=1; isp<=nsp; isp++) if(permsolute[isp])	fprintf(ofp,"%12f ", psdv[isp]);
-	fprintf(ofp,"\npmin\n");
-	for(isp=1; isp<=nsp; isp++) if(permsolute[isp]) fprintf(ofp,"%12f ", pmin[isp]);
-	fprintf(ofp,"\npmax\n");
-	for(isp=1; isp<=nsp; isp++) if(permsolute[isp]) fprintf(ofp,"%12f ", pmax[isp]);
+	fprintf(ofp,"\npminv\n");
+	for(isp=1; isp<=nsp; isp++) if(permsolute[isp]) fprintf(ofp,"%12f ", pminv[isp]);
+	fprintf(ofp,"\npmaxv\n");
+	for(isp=1; isp<=nsp; isp++) if(permsolute[isp]) fprintf(ofp,"%12f ", pmaxv[isp]);
 	fprintf(ofp,"\nvalues\n");
 	for(i=1; i<=nnv; i++){
 		for(isp=1; isp<=nsp; isp++) if(permsolute[isp]) fprintf(ofp,"%12f ", pv[i][isp]);
@@ -886,15 +887,17 @@ mainconv:;
 	ofp = fopen(fname, "w");
 	fprintf(ofp,"Tissue levels\n");
 	for(isp=1; isp<=nsp; isp++){
-		pmax[isp] = -1.e8;
+		pmaxt[isp] = -1.e8;
 		pmeant[isp] = 0.;
 		psdt[isp] = 0.;
-		pmin[isp] = 1.e8;
+		pmint[isp] = 1.e8;
+		nHF = 0;
 		for(itp=1; itp<=nnt; itp++){
 			pmeant[isp] += pt[itp][isp];
 			psdt[isp] += SQR(pt[itp][isp]);
-			pmax[isp] = FMAX(pt[itp][isp],pmax[isp]);
-			pmin[isp] = FMIN(pt[itp][isp],pmin[isp]);
+			pmaxt[isp] = FMAX(pt[itp][isp],pmaxt[isp]);
+			pmint[isp] = FMIN(pt[itp][isp],pmint[isp]);
+			if(oxygen[isp] == 1 && pt[itp][isp] <= tissparam[2][isp]) nHF++;	//for computing hypoxic fraction
 		}
 		pmeant[isp] = pmeant[isp]/nnt;
 		psdt[isp] = sqrt(psdt[isp]/nnt - SQR(pmeant[isp]));
@@ -904,10 +907,10 @@ mainconv:;
 	for(isp=1; isp<=nsp; isp++)	fprintf(ofp,"%12f ", pmeant[isp]);
 	fprintf(ofp,"\npsdt\n");
 	for(isp=1; isp<=nsp; isp++)	fprintf(ofp,"%12f ", psdt[isp]);
-	fprintf(ofp,"\npmin\n");
-	for(isp=1; isp<=nsp; isp++)	fprintf(ofp,"%12f ", pmin[isp]);
-	fprintf(ofp,"\npmax\n");
-	for(isp=1; isp<=nsp; isp++) fprintf(ofp,"%12f ", pmax[isp]);
+	fprintf(ofp,"\npmint\n");
+	for(isp=1; isp<=nsp; isp++)	fprintf(ofp,"%12f ", pmint[isp]);
+	fprintf(ofp,"\npmaxt\n");
+	for(isp=1; isp<=nsp; isp++) fprintf(ofp,"%12f ", pmaxt[isp]);
 	fprintf(ofp,"\nvalues\n");
 	for(itp=1; itp<=nnt; itp++){
 		for(isp=1; isp<=nsp; isp++) fprintf(ofp,"%12f ", pt[itp][isp]);

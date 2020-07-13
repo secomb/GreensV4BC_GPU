@@ -2,16 +2,15 @@
 bicgstabBLASDend - double precision
 end bicgstabBLASD
 TWS, March 2011
+Cuda 10.1 Version, August 2019
 **************************************************************************/
-#include <shrUtils.h>
-#include <cutil_inline.h>
-#include <cusparse.h>
-#include <cublas.h>
+//#include <shrUtils.h>
+//#include <cutil_inline.h>
+#include <cuda_runtime.h>
 #include "nrutil.h"
 
 void bicgstabBLASDend(int nnv)
 {
-	extern int useGPU;
 	extern double *h_x,*h_b,*h_a,*h_rs;
 	extern double *d_a, *d_res, *d_x, *d_b;
 	extern double *d_r, *d_rs, *d_v, *d_s, *d_t, *d_p, *d_er;
@@ -19,7 +18,6 @@ void bicgstabBLASDend(int nnv)
  	const int nmem1 = nnv*sizeof(double);	//needed for malloc
 	const int nmem2 = nnv*nnv*sizeof(double);
 
-	cudaSetDevice( useGPU-1 );
 
 	cudaFree(d_res);
 	cudaFree(d_b);
@@ -33,8 +31,6 @@ void bicgstabBLASDend(int nnv)
 	cudaFree(d_r);
 	cudaFree(d_a);
 	
-	cublasShutdown(); 
-	cudaThreadExit();
 
 	free_dvector(h_rs,0,nnv-1);
 	free_dvector(h_b,0,nnv-1);

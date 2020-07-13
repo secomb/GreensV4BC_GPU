@@ -49,7 +49,7 @@ void input(void)
 	extern float plow, phigh, clowfac, chighfac, pphighfac;
 	extern float lb, maxl, v, vol, req, pi1, alx, aly, alz, xmax, ymax, scalefac;
 	extern float inArteryPO2, inArtPO2, inCapPO2, inVenPO2, HDin0, outConcErrMax; //added April 2019
-	extern float *axt,*ayt,*azt,*ds,*g0,*diff,*pmin,*pmax,*pmean,*pref,*g0fac;
+	extern float *axt,*ayt,*azt,*ds,*g0,*diff,*pref,*g0fac;
 	extern float *diam, *qdata, *hd, *bcprfl, *bchd;
 	extern float *x,*xsl0,*xsl1,*xsl2,*clmin,*clint,*p,*cl,**zv,***psl;
 	extern float **start,**scos,**ax,**cnode,**bcp,**resisdiam,**resis,**tissparam;

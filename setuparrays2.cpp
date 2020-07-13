@@ -16,12 +16,11 @@ void setuparrays2(int nnv, int nnt)
 {
 	extern int nsp, *indx, *mainseg, **tisspoints;
 	extern float *rhs, *qvtemp, *sumal, *dtmin;
+	extern float *histogramdisplay;
 	extern float **qv, **pv, **pev, **pvt, **pvprev, **qvprev, **cv, **dcdp, **cv0, **conv0, **gvv;
 	extern float **qt, **pt, **ptprev, **ptv, **ax, **al;
 	extern double **mat, **rhsg, *rhsl, *matx;
-
-
-
+	
 	mainseg = ivector(1, nnv);
 	indx = ivector(1, nnv + 1);
 	tisspoints = imatrix(1, 3, 1, nnt);
@@ -53,4 +52,5 @@ void setuparrays2(int nnv, int nnt)
 	rhsg = dmatrix(1, nnv + 1, 1, 2);
 	rhsl = dvector(1, nnv + 1);
 	matx = dvector(1, nnv + 1);
+	histogramdisplay = vector(1, IMAX(nnv, nnt)); 	// added for histogram display
 }

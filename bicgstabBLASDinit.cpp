@@ -2,10 +2,11 @@
 bicgstabBLASDinit - double precision
 initialize bicgstabBLASD
 TWS, March 2011
+Cuda 10.1 Version, August 2019
 **************************************************************************/
-#include <shrUtils.h>
-#include <cutil_inline.h>
-#include <cusparse.h>
+//#include <shrUtils.h>
+//#include <cutil_inline.h>
+#include <cuda_runtime.h>
 #include <cublas.h>
 #include "nrutil.h"
 

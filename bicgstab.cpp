@@ -63,7 +63,7 @@ double bicgstab(double **a, double *b, double *x, int n, double eps, int itmax)
 		beta = lunew * delta / (lu*gamma1);
 		lu = lunew;
 		for (i = 1; i <= n; i++) p[i] = r[i] + beta * (p[i] + gamma1 * v[i]);
-		kk += 1;
+		kk++;
 	}
 	while (kk < itmax && err > eps);
 	free_dvector(r, 1, n);
