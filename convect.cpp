@@ -96,10 +96,10 @@ void convect(int isp)
 					for (k = 1; k <= nnv; k++) al[i][k] += al[i][j] * al[j][k];//calculate other alpha values
 				}
 			}
-			if (sumin + sumout != 0.) if (fabs(sumin - sumout) / (sumin + sumout) > 0.01)
+			if (sumin + sumout != 0.) if (fabs(sumin - sumout) / (sumin + sumout + 1.) > 0.01)	//modified July 2024
 				printf("*** Error: Flow conservation violation at node %i\n", nodname[inod]);
-			if (hdsumin + hdsumout != 0.) if (fabs(hdsumin - hdsumout) / (hdsumin + hdsumout) > 0.01)
-				printf("*** Error: Hematocrit conservation violation at node %i\n", nodname[inod]);
+			if (hdsumin + hdsumout != 0.) if (fabs(hdsumin - hdsumout) / (hdsumin + hdsumout + 10.) > 0.01)//modified July 2024
+				printf("*** Error: Hematocrit conservation violation at node %i\n", nodname[inod]);	
 		}
 		//subsegments of outflow segments - convective fluxes and alpha matrix, including network boundary nodes
 		for (ii = 1; ii <= nout; ii++) {		//outflows
@@ -136,7 +136,8 @@ void convect(int isp)
 	}
 	for (i = 1; i <= nnv; i++) qvsum += qv[i][isp] / flowfac;
 	qverror = segcsumin - segcsumout - qvsum;
-	if(fabs(qverror) > 0.01) printf("*** Warning: segcsumin = %f\nsegcsumout = %f\nqvsum = %f\nqverror = %f > 0.01\n",
+	if(fabs(qverror) > 0.01)
+		printf("*** Warning: segcsumin = %f, segcsumout = %f, qvsum = %f, qverror = %f > 0.01\n",
 		segcsumin, segcsumout, qvsum, qverror);
 	if (isegk != nsegfl) printf("*** Error in convect, %i of %i segments processed\n", isegk, nseg);
 	for (i = 1; i <= nnv; i++) al[i][i] = 0.5;

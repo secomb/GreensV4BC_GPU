@@ -3,7 +3,9 @@ tissueGPUcopy
 copy dtt and tisspoints matrices to GPU
 TWS, December 2011
 **************************************************************************/
-#include <cutil_inline.h>
+//#include <shrUtils.h>
+//#include <cutil_inline.h>
+#include "cuda_runtime.h"
 #include "nrutil.h"
 
 void tissueGPUcopy()

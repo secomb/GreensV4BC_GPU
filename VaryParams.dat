@@ -5,7 +5,7 @@ solutefac[isp], intravascfac[isp] - give multiplicative factors
 q0fac - param1
 inArteryPO2 - param2
 tissparam[1][1] - param3
-11 number of runs
+1 number of runs
 run  param1 param2 param3
 1     1.0   130.0   0.00125
 1     1.0   120.0   0.00125
